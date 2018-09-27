@@ -1,0 +1,27 @@
+#potree_render_area{
+ height: 100%;
+ 
+}
+
+#potree_container{
+    border-right: 2px solid whitesmoke;
+}
+
+body {
+    font-family: 'Marmelad', sans-serif;
+    background-color: #000;
+    color: #fff;
+    margin: 0px;
+    overflow: hidden;
+}
+
+.objViewer{
+    padding-left: 100px;
+    margin-left: 200px;
+}
+
+#potree_menu{
+    position: relative;
+    margin-left: 0px;
+  }
+  

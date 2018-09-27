@@ -1,0 +1,20 @@
+{
+  "name": "potree-objloader",
+  "version": "0.0.1",
+  "description": "load potree and obj files together",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "threejs",
+    "potree",
+    "viewer"
+  ],
+  "author": "pushpak",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "path": "^0.12.7"
+  }
+}
