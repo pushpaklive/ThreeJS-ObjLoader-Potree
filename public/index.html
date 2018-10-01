@@ -79,7 +79,7 @@
         viewer.setPointBudget(1 * 1000 * 1000);
         document.title = "";
         viewer.setEDLEnabled(false);
-        viewer.setBackground("black"); // ["skybox", "gradient", "black", "white"];
+        viewer.setBackground("gradient"); // ["skybox", "gradient", "black", "white"];
         viewer.setDescription(``);
         viewer.loadSettingsFromURL();
 
@@ -110,8 +110,9 @@
     <script>
         var container;
         var camera, scene, renderer;
-        var controls, light, spLight, clock, stats;
+        var controls, light, spLight, clock, stats, fogColor;
         var EventsControls;
+        var smokeTexture, smokeMaterial, smokeGeo, smokeParticles, cubeSineDriver;
         var mouseX = 0, mouseY = 0;
         var windowHalfX = window.innerWidth / 2;
         var windowHalfY = window.innerHeight / 2;
@@ -131,7 +132,7 @@
             //document.body.appendChild( container );
             //document.getElementById("objViewer").addEventListener( 'mousedown', onDocumentMouseDown, false );
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / 2 / window.innerHeight, 2, 2000);
-            camera.position.z = 250;
+            camera.position.z = 270;
 
 
             // scene
@@ -149,48 +150,48 @@
                         console.log("child : " + child)
                         child.material.map = texture;
                         child.castShadow = true;
-                        child.receiveShadow = true;
+                        cubeSineDriver = 0;
+                        //child.receiveShadow = true;
                         meshChild = child;
                     }
                 });
-                object.castShadow = true;
-                object.position.y = - 25;
+
+                scene.add(object);
+                object.position.x = 0;
+                object.position.y = -20;
+                object.position.z = 0;
+
+
                 //Lights
                 spLight = new THREE.SpotLight(0x654321, 1.75, 2000, Math.PI / 3);
                 spLight.castShadow = true;
                 spLight.position.set(-100, 300, -50);
                 scene.add(spLight);
 
-                var ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200, 10, 10), new THREE.MeshLambertMaterial({ color: 0x006600 }));
+                var ground = new THREE.Mesh(new THREE.PlaneGeometry(5000, 5000, 10, 10), new THREE.MeshLambertMaterial({ color: 0xf5f5f5 }));
                 ground.receiveShadow = true;
-                ground.position.set(0, -30, 0);
+                ground.position.set(0, -25, 0);
                 ground.rotation.x = -Math.PI / 2;
                 scene.add(ground);
+
+                //Helpers
+                /* var helper = new THREE.CameraHelper(spLight.shadow.camera);
+                scene.add(helper);
+
+                scene.add( new THREE.AxisHelper( 200 ) ); */
+
+                var spLight = new THREE.SpotLight(0xffffff, 1, 2000, Math.PI / 3);
+                spLight.castShadow = true;
+                spLight.position.set(100, 300, -50);
+                scene.add(spLight);            
 
                 //main model object
                 scene.add(object);
 
-                //Lights
-                keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
-                keyLight.position.set(-100, 0, 100);
 
-                fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 0.75);
-                fillLight.position.set(100, 0, 100);
+            }//loadModel()
 
-                backLight = new THREE.DirectionalLight(0xffffff, 1.0);
-                backLight.position.set(100, 0, -100).normalize();
 
-                scene.add(keyLight);
-                scene.add(fillLight);
-                scene.add(backLight);
-
-                //other lights
-                var spLight = new THREE.SpotLight(0xffffff, 1, 2000, Math.PI / 3);
-                spLight.castShadow = true;
-                spLight.position.set(-100, 300, -50);
-                scene.add(spLight);
-
-            }
             var modelMaterial = new THREE.MeshPhongMaterial({
                 color: 0xb9d5ff,
                 ambient: 0xfff660,
@@ -208,7 +209,17 @@
             };
             // texture
             var textureLoader = new THREE.TextureLoader(manager);
-            var texture = textureLoader.load('textures/night-sky.png');
+            var texture = textureLoader.load('models/ironman.jpg');
+
+            /* to change texture using three image loader
+             var manager1 = new THREE.LoadingManager();
+             var texture1 = new THREE.Texture();
+             var loader = new THREE.ImageLoader( manager1 );
+             loader.load( 'models/rough.jpg', function ( image ) {
+             texture1.image = image;
+             texture1.needsUpdate = true;
+             }); */
+
             // model
 
             function onProgress(xhr) {
@@ -218,41 +229,48 @@
                 }
             }
             function onError(xhr) { }
+
             var loader = new THREE.OBJLoader(manager);
-            loader.load('models/247_House 15_obj.obj', function (obj) {
-                obj.scale.set(.3, .3, .3);//to reduce size of model- to one third
+
+            loader.load('models/IronMan.obj', function (obj) {
+                obj.scale.set(.5, .5, .5);//to reduce size of model- to one third
                 object = obj; //object for using model overall
                 objects.push(object);
             }, onProgress, onError);
 
-
             //Renderer
             renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
-            renderer.setClearColor(0x000000, 0);
-            renderer.shadowMapEnabled = true;
+
+            renderer.setClearColor(0x000000, 1);
+
+            //renderer.shadowMapEnabled = true;
             renderer.shadowMapSoft = true;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            //newly added
+            /* renderer.physicallyCorrectLights = true;
+            renderer.gammaInput = true;
+            renderer.gammaOutput = true;
+            //renderer.toneMapping = THREE.ReinhardToneMapping;*/
+            clock = new THREE.Clock();
+            console.log("clock : " + clock)
 
             controls = new THREE.OrbitControls(camera);
-            clock = new THREE.Clock();
 
-            // prepare stats //commented for now from animate()
-            /* stats = new Stats();
-            stats.domElement.style.position = 'absolute';
-            stats.domElement.style.left = '50px';
-            stats.domElement.style.bottom = '50px';
-            stats.domElement.style.zIndex = 1;
-            container.appendChild(this.stats.domElement); */
+            controls.addEventListener('change', render);
+
             /* controls.enableDamping = true;
             controls.dampingFactor = 0.25;
             controls.enableZoom = true; //added peed to the rotation speed of the model */
-            controls.addEventListener('change', render);
+
             renderer.setPixelRatio(window.devicePixelRatio);
             renderer.setSize(window.innerWidth / 2, window.innerHeight);
             container.appendChild(renderer.domElement);
 
 
             //document.addEventListener( 'mousemove', onDocumentMouseMove, false );//for selected comp data
-            document.getElementById("objViewer").addEventListener('mousedown', onDocumentMouseDown, false);
+            //document.getElementById("objViewer").addEventListener('mousedown', onDocumentMouseDown, false);
             window.addEventListener('resize', onWindowResize, false);
         }
 
@@ -286,7 +304,7 @@
 
             var intersects = ray.intersectObjects(objects[0].children);
 
-            console.log("intersects scene children : "+intersects);
+            console.log("intersects scene children : " + JSON.stringify(intersects));
 
             if (intersects.length > 0) {
                 console.log("selected!");
@@ -299,14 +317,17 @@
             requestAnimationFrame(animate);
             render();
             controls.update();
+            /* //for rotating object on y axis, change respectively for other axis
+            object.rotation.y += 0.01; */
             //stats.update();
         }
+
+
+
         function render() {
-            //camera.position.x += ( mouseX - camera.position.x ) * .05;
-            //camera.position.y += ( - mouseY - camera.position.y ) * .05;
-            //camera.lookAt( scene.position );
             renderer.render(scene, camera);
         }
+
 
         var already_selected = false;
 
