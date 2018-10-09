@@ -145,9 +145,9 @@
                 spLight.position.set(-100, 300, -50);
                 scene.add(spLight);
 
-                var ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200, 10, 10), new THREE.MeshLambertMaterial({ color: 0x006600 }));
+                var ground = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000, 10, 10), new THREE.MeshLambertMaterial({ color: 0xffffff }));
                 ground.receiveShadow = true;
-                ground.position.set(0, -40, 0);
+                ground.position.set(0, -20, 0);
                 ground.rotation.x = -Math.PI / 2;
                 scene.add(ground);
 

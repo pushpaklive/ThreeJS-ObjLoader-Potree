@@ -142,14 +142,14 @@
                 object.castShadow = true;
                 object.position.y = - 35;
                 //Lights
-                var spLight = new THREE.SpotLight(0x654321, 1.75, 2000, Math.PI / 3);
+                var spLight = new THREE.SpotLight(0xffffff, 1, 2000, Math.PI / 3);
                 spLight.castShadow = true;
-                spLight.position.set(-100, 300, -50);
+                spLight.position.set(100, 300, -50);
                 scene.add(spLight);
 
-                var ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200, 10, 10), new THREE.MeshLambertMaterial({ color: 0x006600 }));
+                var ground = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000, 10, 10), new THREE.MeshLambertMaterial({ color: 0xffffff }));
                 ground.receiveShadow = true;
-                ground.position.set(0, -40, 0);
+                ground.position.set(0, -20, 0);
                 ground.rotation.x = -Math.PI / 2;
                 scene.add(ground);
 
@@ -197,7 +197,7 @@
             }
             function onError(xhr) { }
             var loader = new THREE.OBJLoader(manager);
-            loader.load('models/247_House 15_obj.obj', function (obj) {
+            loader.load('models/houseinterior.obj', function (obj) {
                 obj.scale.set(.3, .3, .3);//to reduce size of model- to one third
                 
                 object = obj;
@@ -220,6 +220,9 @@
             //
             renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true });
             renderer.setClearColor(0x000000, 0);
+            renderer.shadowMapSoft = true;
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             /* renderer.autoClearColor = false;
             var plane = new THREE.Mesh(new THREE.PlaneGeometry(500, 500), new THREE.MeshBasicMaterial({ transparent: true, opacity: 0.1 }));
                             plane.position.z = -10;
